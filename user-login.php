@@ -80,22 +80,22 @@ if (empty($vg_userRefCode)) {
 
 <div class="container">
     <div class="row mt-3">
-        <div class="col-md-4 offset-md-4 text-center">
+        <div class="col-md-4 offset-md-4 d-flex justify-content-center">
             <img src="../_app-asset/image/apks-logo-310x310.png" width="75%" alt="...">
         </div>
     </div>
     <div class="row mt-3">
-        <div class="col-md-4 offset-md-4 text-center">
+        <div class="col-md-4 offset-md-4 d-flex justify-content-center">
             <h4>APKS web application user system</h4>
         </div>
     </div>
-    <div class="row mt-3">
-        <div class="col-md-4 offset-md-4 text-center">เข้าสู่ระบบ / <a href="user-register.php"
+    <div class="row mt-3 text-center">
+        <div class="col-md-4 offset-md-4 d-flex justify-content-center">เข้าสู่ระบบ / <a href="user-register.php"
                                                                        class="text-secondary"><?= $textTitle; ?></a>
         </div>
     </div>
     <form action="user-action.php" method="post">
-        <div class="row mt-3 px-3">
+        <div class="row mt-3 px-3 text-center">
             <div class="col-md-6 offset-md-3 bg-white" style="border-radius:5px">
                 <div class="row mt-5">
                     <div class="col-md-12">

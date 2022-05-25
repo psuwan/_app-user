@@ -1,7 +1,7 @@
 <?php
-
+@ini_set("session.use_trans_sid", false);
 //--> SESSION START
-session_start();
+@session_start();
 
 date_default_timezone_set('Asia/Bangkok');
 $dateNow = date("Y-m-d");
@@ -32,6 +32,9 @@ $vp_userPassword = password_hash($vp_userPassword, PASSWORD_DEFAULT);
 $vp_loginApp = filter_input(INPUT_POST, "login_app");
 $vp_loginUser = filter_input(INPUT_POST, "login_user");
 $vp_loginPass = filter_input(INPUT_POST, "login_pass");
+
+//--> COUNT FOR LOGIN TIME
+$loginTime = 1;
 
 $vp_app2ListUser = filter_input(INPUT_POST, "app2ListUsr");
 
@@ -76,14 +79,49 @@ if (!empty($vp_processName)) {
                 echo "<script>alert(\"Error! [wrong password]\")</script>";
                 echo "<script>window.location.href=\"user-login.php\"</script>";
             } else {
+                $generatedLoginToken = genToken(50);
+                $checkLoginWithThisUser = cntRows("tbl_logintoken", "user_refnumber", $vp_loginUser, 2);
+                if ($checkLoginWithThisUser < $loginTime) {
+                    $sqlcmd_writeLoginToken = "INSERT INTO tbl_logintoken (user_refnumber, user_tokengen, user_logintime) VALUES ('" . $vp_loginUser . "', '" . $generatedLoginToken . "', NOW())";
+                    $sqlres_writeLoginToken = mysqli_query($dbConn, $sqlcmd_writeLoginToken);
+
+                    if (!$sqlres_writeLoginToken) {
+                        die("ERROR! [" . mysqli_error($dbConn) . "]");
+                    } else {
+                        $_SESSION["loginToken"] = $generatedLoginToken;
+                        $_SESSION["loginUser"] = $vp_loginUser;
+                    }
+                } else {
+                    $sqlcmd_deleteLoginToken = " DELETE FROM tbl_logintoken WHERE user_refnumber='" . $vp_loginUser . "' ORDER BY user_logintime ASC LIMIT " . (($checkLoginWithThisUser - $loginTime) + 1);
+                    $sqlres_deleteLoginToken = mysqli_query($dbConn, $sqlcmd_deleteLoginToken);
+
+                    if ($sqlres_deleteLoginToken) {
+                        $sqlcmd_writeLoginToken = "INSERT INTO tbl_logintoken (user_refnumber, user_tokengen, user_logintime) VALUES ('" . $vp_loginUser . "', '" . $generatedLoginToken . "', NOW())";
+                        $sqlres_writeLoginToken = mysqli_query($dbConn, $sqlcmd_writeLoginToken);
+
+                        if (!$sqlres_writeLoginToken) {
+                            die("ERROR! [" . mysqli_error($dbConn) . "]");
+                        } else {
+                            $_SESSION["loginToken"] = $generatedLoginToken;
+                            $_SESSION["loginUser"] = $vp_loginUser;
+                            echo "del | ";
+                        }
+                    } else {
+                        die("ERROR! [" . mysqli_error($dbConn) . "]");
+                    }
+                }
+
                 //--> LOG REGISTER USER EVENT
                 logWrite("NORMAL", "USER LOGIN", get1Data("tbl_profiles", "profile_refnumber", $vp_loginUser, 2, "profile_namefirst") . " " . get1Data("tbl_profiles", "profile_refnumber", $vp_loginUser, 2, "profile_namelast") . " SUCCESS TO LOGIN " . get1Data("tbl_applications", "app_code", $vp_loginApp, 2, "app_name"));
-                echo "ผ่าน";
+                echo "pass | write log";
+                echo "<br>";
+                echo "<pre>";
+                var_dump($_SESSION);
+                echo "</pre>";
             }
             break;
 
-        case
-        "listUser4App":
+        case "listUser4App":
             $sqlcmd_listUsers = "SELECT * FROM tbl_users WHERE user_application='" . $vp_app2ListUser . "'";
             $sqlres_listUsers = mysqli_query($dbConn, $sqlcmd_listUsers);
 

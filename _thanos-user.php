@@ -3,26 +3,20 @@
 date_default_timezone_set('Asia/Bangkok');
 $dateNow = date("Y-m-d");
 $timeNow = date("H:i:s");
+$dt2_userRefCode = date("YmdHis");
 
 $thisFilename = basename(trim(str_replace(__DIR__, "", __FILE__), DIRECTORY_SEPARATOR), ".php");
 
 include_once '../_app-lib/functions.php';
 $dbConn = dbConnect();
 
-
-do {
-    $genUserRefNumber = date("YmdHis");
-    $genUserRefNumber .= genToken(36);
-    $userRefNumberChkExist = cntRows("tbl_users", "user_refnumber", $genUserRefNumber, 2);
-} while ($userRefNumberChkExist > 0);
-
-$vg_userRefNumber = filter_input(INPUT_GET, "userRefNumber");
+$vg_userRefCode = filter_input(INPUT_GET, "userRefCode");
 if (empty($vg_userRefCode)) {
     $textTitle = "ลงทะเบียนผู้ใช้";
-    $userRefNumber = $genUserRefNumber;
+    $userRefCode = $dt2_userRefCode;
 } else {
     $textTitle = "แก้ไขข้อมูลผู้ใช้";
-    $userRefNumber = $vg_userRefNumber;
+    $userRefCode = $vg_userRefCode;
 }
 
 ?>
@@ -90,11 +84,11 @@ if (empty($vg_userRefCode)) {
         </div>
     </div>
     <div class="row mt-3">
-        <div class="col-md-4 offset-md-4 text-center">เข้าสู่ระบบ / <a href="user-register.php"
-                                                                       class="text-secondary"><?= $textTitle; ?></a>
+        <div class="col-md-4 offset-md-4 text-center">
+            thanos manage users
         </div>
     </div>
-    <form action="user-action.php" method="post">
+    <form action="act4-user.php" method="post">
         <div class="row mt-3 px-3">
             <div class="col-md-6 offset-md-3 bg-white" style="border-radius:5px">
                 <div class="row mt-5">
@@ -121,43 +115,9 @@ if (empty($vg_userRefCode)) {
                 <!-- ROW USER -->
                 <div class="row mt-2">
                     <div class="col-md-12">
-                        <select name="login_user" id="id4_select_loginuser"
-                                class="form-control form-control-sm select2-basic-single" required>
-                            <option value=""></option>
-                            <?php
-                            $sqlcmd_listUsers = "SELECT * FROM tbl_users WHERE 0";
-                            $sqlres_listUsers = mysqli_query($dbConn, $sqlcmd_listUsers);
-
-                            if ($sqlres_listUsers) {
-                                while ($sqlfet_listUsers = mysqli_fetch_assoc($sqlres_listUsers)) {
-                                    ?>
-                                    <option value="<?= $sqlfet_listUsers["user_refnumber"]; ?>"><?= $sqlfet_listUsers["user_refnumber"]; ?></option>
-                                    <?php
-                                }
-                            }
-                            ?>
-                        </select>
+                        table show users list
                     </div>
                 </div><!-- ROW USER -->
-
-                <!-- ROW PASSWORD -->
-                <div class="row mt-2">
-                    <div class="col-md-12 text-center">
-                        <input type="password" name="login_pass" id="id4_input_password"
-                               class="form-control form-control-sm"
-                               placeholder="รหัสผ่าน" required>
-                    </div>
-                </div><!-- ROW PASSWORD -->
-
-                <div class="row mt-2 mb-5">
-                    <div class="col-md-12 text-center">
-                        <input type="hidden" name="processName" value="user_login">
-                        <button type="submit" class="btn btn-sm btn-block btn-primary" id="id4_button_submit_login"
-                                style="font-size:14px;background-color:#A3CA76;">
-                            เข้าระบบ
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
     </form>
@@ -196,53 +156,6 @@ if (empty($vg_userRefCode)) {
     $(function () {
         $('[data-toggle="tooltip"]').tooltip()
     })
-</script>
-
-<script>
-    let regisButton = document.getElementById("id4_button_submit_register");
-    let inputPassword = document.getElementById("id4_input_password1");
-    let inputRePassword = document.getElementById("id4_input_password2");
-    let checkedPassword = function (password2Check) {
-        if (password2Check.length >= 6) {
-            if (isPasswordValid(password2Check)) {
-                // Remove boxShadow glowing
-                inputPassword.style.boxShadow = "";
-                // input borderColor color
-                inputPassword.style.borderColor = "green";
-            }
-        } else {
-            // boxShadow glowing
-            inputPassword.style.boxShadow = "0 0 5px rgba(255, 0, 0, 1)";
-            regisButton.style.background = "gray";
-            regisButton.disabled = true;
-        }
-    }
-
-    let isPasswordValid = function (text2Check) {
-        /*
-          Usernames can only have:
-          - Lowercase Letters (a-z)
-          - Numbers (0-9)
-          - Dots (.)
-          - Underscores (_)
-        */
-        const res = /^[a-zA-Z0-9_\.@#$%^&!]+$/.exec(text2Check);
-        const valid = !!res;
-        return valid;
-    }
-
-    let checkedRePassword = function (rePassword2Check) {
-        if (rePassword2Check !== inputPassword.value) {
-            inputRePassword.style.boxShadow = "0 0 5px rgba(255, 0, 0, 1)";
-            regisButton.style.background = "gray";
-            regisButton.disabled = true;
-        } else {
-            inputRePassword.style.boxShadow = "";
-            inputRePassword.style.borderColor = "green";
-            regisButton.style.background = "#A3CA76";
-            regisButton.disabled = false;
-        }
-    }
 </script>
 
 <script>
